@@ -20,6 +20,9 @@ import com.devstree.mediafilepicker.enumeration.MediaType
 import com.devstree.mediafilepicker.model.Media
 import com.devstree.mediafilepicker.model.Thumb
 import id.zelory.compressor.Compressor
+import id.zelory.compressor.constraint.destination
+import id.zelory.compressor.constraint.format
+import id.zelory.compressor.constraint.quality
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -431,44 +434,27 @@ object FileUtil {
         return extension
     }
 
-    fun compressToBitmap(
-        context: Context,
-        file: File?,
-        width: Int,
-        height: Int,
-        quality: Int
-    ): Bitmap? {
-        try {
-            return Compressor(context)
-                .setMaxWidth(width).setMaxHeight(height)
-                .setQuality(quality).setCompressFormat(Bitmap.CompressFormat.JPEG)
-                .compressToBitmap(file)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
+    fun compressToBitmap(context: Context, file: File?, width: Int, height: Int, quality: Int): Bitmap? {
+//        try {
+//            return Compressor(context)
+//                .setMaxWidth(width).setMaxHeight(height)
+//                .setQuality(quality).setCompressFormat(Bitmap.CompressFormat.JPEG)
+//                .compressToBitmap(file)
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//        }
         return null
     }
 
-    fun imageCompress(context: Context, file: File, mediaType: MediaType): File {
+      suspend fun imageCompress(context: Context, file: File, mediaType: MediaType): File {
         try {
-            val compressedFile = Compressor(context)
-//                .setMaxWidth(width).setMaxHeight(height)
-                .setQuality(50)
-                .setDestinationDirectoryPath(MediaType.getRootDirectory(context, mediaType))
-                .setCompressFormat(Bitmap.CompressFormat.JPEG)
-                .compressToFile(
-                    file,
-                    file.nameWithoutExtension + UNDER_SCORE + "compressed" + MediaType.getExtension(
-                        mediaType
-                    )
-                )
-
-            return if (compressedFile != null) {
-                if (file.exists()) file.delete()
-                compressedFile
-            } else {
-                file
+            val compressedFile = Compressor.compress(context, file) {
+                quality(50)
+                format(Bitmap.CompressFormat.JPEG)
+                destination(File(MediaType.getRootDirectory(context, mediaType) + file.nameWithoutExtension + UNDER_SCORE + "compressed" + MediaType.getExtension(mediaType)))
             }
+            if (file.exists()) file.delete()
+            return compressedFile
         } catch (e: Exception) {
             e.printStackTrace()
         }

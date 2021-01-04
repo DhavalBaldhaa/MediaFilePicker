@@ -17,6 +17,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.*
 import android.view.ViewGroup
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import com.devstree.mediafilepicker.listener.MediaPickerCallback
 import com.devstree.mediafilepicker.R
 import com.devstree.mediafilepicker.databinding.BottomSheetCameraDialogBinding
@@ -25,6 +27,8 @@ import com.devstree.mediafilepicker.model.Media
 import com.devstree.mediafilepicker.model.Thumb
 import com.devstree.mediafilepicker.utils.FileUtil
 import com.devstree.mediafilepicker.utils.MediaLog
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks
@@ -42,6 +46,18 @@ open class BottomSheetFilePicker : BaseBottomSheet(), OnClickListener {
     private var directAction = false
     private var mediaPickerCallback: MediaPickerCallback? = null
     private lateinit var binding: BottomSheetCameraDialogBinding
+
+    @DrawableRes
+    var actionButtonBg: Int? = null
+
+    @ColorRes
+    var actionButtonTextColor: Int? = null
+
+    @DrawableRes
+    var cancelButtonBg: Int? = null
+
+    @ColorRes
+    var cancelButtonTextColor: Int? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -100,6 +116,26 @@ open class BottomSheetFilePicker : BaseBottomSheet(), OnClickListener {
             binding.btnChooseImage.visibility = GONE
             binding.btnTakeVideo.visibility = VISIBLE
         }
+
+        if (actionButtonBg != null) {
+            with(binding) {
+                btnTakePhoto.setBackgroundResource(actionButtonBg!!)
+                btnChooseImage.setBackgroundResource(actionButtonBg!!)
+                btnTakeVideo.setBackgroundResource(actionButtonBg!!)
+                btnChooseVideo.setBackgroundResource(actionButtonBg!!)
+            }
+        }
+
+        if (actionButtonTextColor != null) {
+            with(binding) {
+                btnTakePhoto.setTextColor(actionButtonTextColor!!)
+                btnChooseImage.setTextColor(actionButtonTextColor!!)
+                btnTakeVideo.setTextColor(actionButtonTextColor!!)
+                btnChooseVideo.setTextColor(actionButtonTextColor!!)
+            }
+        }
+        if (cancelButtonBg != null) binding.btnEditCancel.setBackgroundResource(cancelButtonBg!!)
+        if (cancelButtonTextColor != null) binding.btnEditCancel.setTextColor(cancelButtonTextColor!!)
     }
 
     override fun onClick(view: View) {
@@ -240,8 +276,10 @@ open class BottomSheetFilePicker : BaseBottomSheet(), OnClickListener {
                 try {
                     if (context == null) return
                     if (file == null) return
-                    file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
-                    media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
+                    GlobalScope.launch {
+                        file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
+                        media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     media = null
@@ -254,8 +292,10 @@ open class BottomSheetFilePicker : BaseBottomSheet(), OnClickListener {
                     file =
                         FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.IMAGE)
                     if (file == null) return
-                    file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
-                    media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
+                    GlobalScope.launch {
+                        file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
+                        media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     media = null

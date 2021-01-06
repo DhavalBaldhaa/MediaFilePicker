@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     }
                 })
                 bottomSheetFilePicker.show(supportFragmentManager, "take_all")
+                bottomSheetFilePicker.setAction(BottomSheetFilePicker.TAKE_PHOTO)
             }
         }
     }

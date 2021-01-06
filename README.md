@@ -25,13 +25,32 @@ dependencies {
 }
 ```
 
+Step 3. Add Provider in manifest file
+```
+<application
+...
+android:requestLegacyExternalStorage="true">
+    ...
+    <provider
+        android:name="androidx.core.content.FileProvider"
+        android:authorities="${applicationId}.provider"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/file_picker_provider_paths" />
+    </provider>
+    ....
+</application>
+```
+
 ## Usage
 
 To **initialize** the sdk class, Use below code and setListeners to
 receive the callback.
 
 ```kotlin
-val bottomSheetFilePicker = BottomSheetFilePicker()
+val bottomSheetFilePicker = BottomSheetFilePicker(BuildConfig.APPLICATION_ID)
 
 bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.TAKE_ALL /*file pick action*/, object : MediaPickerCallback {
     override fun onPickedSuccess(media: Media?) {
@@ -49,6 +68,11 @@ bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.TAKE_ALL /*
 
 /*show file picker dialog in bottom*/
 bottomSheetFilePicker.show(supportFragmentManager, "take_all")
+```
+
+**Set Direct Action**
+```
+bottomSheetFilePicker.setAction(BottomSheetFilePicker.TAKE_PHOTO)
 ```
 
 **UI Customization** Use this method for customize of default library ui

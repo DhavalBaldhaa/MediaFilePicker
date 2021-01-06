@@ -1,3 +1,9 @@
+<h1 align="center">MediaFilePicker</h1>
+<p align="center">
+  <a href="https://jitpack.io/#dhaval-baldha1812/mediafilepicker"> <img src="https://jitpack.io/v/dhaval-baldha1812/mediafilepicker/month.svg" /></a>
+  <a href="https://jitpack.io/#dhaval-baldha1812/mediafilepicker"> <img src="https://jitpack.io/v/dhaval-baldha1812/mediafilepicker.svg" /></a>
+</p>
+
 MediaFilePicker is android library which will help you to pick any type
 of media file in your application. No need to manage any kind of extra
 permission or result method override. Just create library class instance
@@ -61,3 +67,11 @@ bottomSheetFilePicker.actionButtonTextColor = R.color.purple_500
 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
 ```
 
+## Author
+Maintained by [Dhaval Baldha](https://www.github.com/dhaval-baldha1812)
+
+## Contribution
+[![GitHub contributors](https://img.shields.io/github/contributors/dhaval-baldha1812/MediaFilePicker.svg)](https://github.com/dhaval-baldha1812/MediaFilePicker/graphs/contributors)
+
+* Bug reports and pull requests are welcome.
+* Make sure you use [square/java-code-styles](https://github.com/square/java-code-styles) to format your code.

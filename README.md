@@ -61,6 +61,3 @@ bottomSheetFilePicker.actionButtonTextColor = R.color.purple_500
 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
 ```
 
-**File Pick Options**
-
-

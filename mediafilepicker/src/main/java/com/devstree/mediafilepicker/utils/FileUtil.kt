@@ -51,15 +51,6 @@ object FileUtil {
 
     private fun getExternalStoragePath(context: Context): String {
         return context.getExternalFilesDir(Environment.DIRECTORY_DCIM)?.absolutePath + ROOT_DIRECTORY
-//        val path = context.filesDir.absolutePath + ROOT_DIRECTORY
-//        val dir = File(path)
-//        if(!dir.exists()) dir.mkdirs()
-//        return path
-
-//        return Environment.getExternalStorageDirectory().toString() + ROOT_DIRECTORY
-//        Environment.getDataDirectory()
-//        val cw = ContextWrapper(context)
-//        return cw.getDir("Storage", Context.MODE_PRIVATE).path         // path to /data/data/yourapp/app_data/imageDir
     }
 
     @JvmStatic
@@ -113,10 +104,10 @@ object FileUtil {
         return getDirectory(context, RESTORE_DIRECTORY)
     }
 
-    fun getURI(context: Context?, file: File?): Uri {
+    fun getURI(context: Context?, applicationId: String, file: File?): Uri {
         return FileProvider.getUriForFile(
             context!!,
-            BuildConfig.LIBRARY_PACKAGE_NAME + ".provider",
+            "$applicationId.provider",
             file!!
         )
     }
@@ -434,7 +425,13 @@ object FileUtil {
         return extension
     }
 
-    fun compressToBitmap(context: Context, file: File?, width: Int, height: Int, quality: Int): Bitmap? {
+    fun compressToBitmap(
+        context: Context,
+        file: File?,
+        width: Int,
+        height: Int,
+        quality: Int
+    ): Bitmap? {
 //        try {
 //            return Compressor(context)
 //                .setMaxWidth(width).setMaxHeight(height)
@@ -446,12 +443,21 @@ object FileUtil {
         return null
     }
 
-      suspend fun imageCompress(context: Context, file: File, mediaType: MediaType): File {
+    suspend fun imageCompress(context: Context, file: File, mediaType: MediaType): File {
         try {
             val compressedFile = Compressor.compress(context, file) {
                 quality(50)
                 format(Bitmap.CompressFormat.JPEG)
-                destination(File(MediaType.getRootDirectory(context, mediaType) + file.nameWithoutExtension + UNDER_SCORE + "compressed" + MediaType.getExtension(mediaType)))
+                destination(
+                    File(
+                        MediaType.getRootDirectory(
+                            context,
+                            mediaType
+                        ) + file.nameWithoutExtension + UNDER_SCORE + "compressed" + MediaType.getExtension(
+                            mediaType
+                        )
+                    )
+                )
             }
             if (file.exists()) file.delete()
             return compressedFile
@@ -608,9 +614,9 @@ object FileUtil {
         ) + " " + units[digitGroups]
     }
 
-    fun intentMedia(context: Context, media: Media) {
+    fun intentMedia(context: Context, applicationId: String, media: Media) {
         try {
-            val uri = getURI(context, media.getDownloadFile(context))
+            val uri = getURI(context, applicationId, media.getDownloadFile(context))
             val mime = context.contentResolver.getType(uri)
             val intent = Intent(Intent.ACTION_VIEW)
             intent.setDataAndType(uri, mime)

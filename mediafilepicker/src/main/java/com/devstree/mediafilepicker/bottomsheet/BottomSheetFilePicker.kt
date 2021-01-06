@@ -19,10 +19,10 @@ import android.view.View.*
 import android.view.ViewGroup
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.devstree.mediafilepicker.listener.MediaPickerCallback
 import com.devstree.mediafilepicker.R
 import com.devstree.mediafilepicker.databinding.BottomSheetCameraDialogBinding
 import com.devstree.mediafilepicker.enumeration.MediaType
+import com.devstree.mediafilepicker.listener.MediaPickerCallback
 import com.devstree.mediafilepicker.model.Media
 import com.devstree.mediafilepicker.model.Thumb
 import com.devstree.mediafilepicker.utils.FileUtil
@@ -31,7 +31,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
-import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks
 import java.io.File
 
 /**
@@ -249,7 +248,7 @@ open class BottomSheetFilePicker : BaseBottomSheet(), OnClickListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
-            Thread(Runnable {
+            Thread {
                 showProgressBar(true)
                 try {
                     processActivityResult(requestCode, data)
@@ -257,7 +256,7 @@ open class BottomSheetFilePicker : BaseBottomSheet(), OnClickListener {
                     e.printStackTrace()
                 }
                 showProgressBar(false)
-            }).start()
+            }.start()
         } else {
             MediaLog.e("Activity Result Code $resultCode")
             if (directAction) hideBottomSheet()
@@ -266,87 +265,85 @@ open class BottomSheetFilePicker : BaseBottomSheet(), OnClickListener {
 
     private fun showProgressBar(enable: Boolean) {
         if (mediaPickerCallback == null) return
-        executeOnMain(Runnable { mediaPickerCallback?.showProgressBar(enable) })
+        executeOnMain({ mediaPickerCallback?.showProgressBar(enable) })
     }
 
     private fun processActivityResult(requestCode: Int, intent: Intent?) {
-        var media: Media? = null
-        when (requestCode) {
-            TAKE_PHOTO -> {
-                try {
-                    if (context == null) return
-                    if (file == null) return
-                    GlobalScope.launch {
+        GlobalScope.launch {
+            var media: Media? = null
+            when (requestCode) {
+                TAKE_PHOTO -> {
+                    try {
+                        if (context == null) return@launch
+                        if (file == null) return@launch
                         file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
                         media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        media = null
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    media = null
                 }
-            }
-            CHOOSE_IMAGE_FROM_GALLERY -> {
+                CHOOSE_IMAGE_FROM_GALLERY -> {
 //                file = FileUtil.getNewPath(context, intent.getData(), MediaType.IMAGE);
-                try {
-                    if (context == null) return
-                    file =
-                        FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.IMAGE)
-                    if (file == null) return
-                    GlobalScope.launch {
+                    try {
+                        if (context == null) return@launch
+                        file =
+                            FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.IMAGE)
+                        if (file == null) return@launch
                         file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
                         media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        media = null
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    media = null
                 }
-            }
-            TAKE_VIDEO -> {
-                if (file != null) media =
-                    Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
-            }
-            CHOOSE_VIDEO_FROM_GALLERY -> {
-                //              trimRequest(data.getUser());
+                TAKE_VIDEO -> {
+                    if (file != null) media =
+                        Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
+                }
+                CHOOSE_VIDEO_FROM_GALLERY -> {
+                    //              trimRequest(data.getUser());
 //                file = FileUtil.getNewPath(context, intent.getData(), MediaType.VIDEO);
-                file = FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.VIDEO)
-                if (file == null) return
-                val mMedia: Media =
-                    Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
-                if (mMedia.isValid) media = mMedia
-            }
-            CROP_REQUEST -> {
-                if (file == null) return
-                media = Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
-            }
-            PICK_DOCUMENT -> {
-                try {
-                    if (intent!!.data == null) return
-                    file = FileUtil.getFileFromUri(
-                        mContext,
-                        intent.data,
-                        MediaType.DOCUMENT
-                    )
-                    if (file == null) return
-                    media = Media.create(Thumb.generate(MediaType.DOCUMENT, file!!))
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    media = null
+                    file = FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.VIDEO)
+                    if (file == null) return@launch
+                    val mMedia: Media =
+                        Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
+                    if (mMedia.isValid) media = mMedia
                 }
-            }
-            PICK_CONTACT -> {
+                CROP_REQUEST -> {
+                    if (file == null) return@launch
+                    media = Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
+                }
+                PICK_DOCUMENT -> {
+                    try {
+                        if (intent!!.data == null) return@launch
+                        file = FileUtil.getFileFromUri(
+                            mContext,
+                            intent.data,
+                            MediaType.DOCUMENT
+                        )
+                        if (file == null) return@launch
+                        media = Media.create(Thumb.generate(MediaType.DOCUMENT, file!!))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        media = null
+                    }
+                }
+                PICK_CONTACT -> {
 //                if (intent!!.data == null) return
 //                media = Media.create(Ezvcard.write(readContactFromUri(context, intent.data)).version(VCardVersion.V4_0).go())
+                }
+            }
+            if (mediaPickerCallback == null) return@launch
+            executeOnMain {
+                showProgressBar(false)
+                if (media == null)
+                    mediaPickerCallback!!.onPickedError(null)
+                else
+                    mediaPickerCallback!!.onPickedSuccess(media)
+                hideBottomSheet()
             }
         }
-        if (mediaPickerCallback == null) return
-        executeOnMain(Runnable {
-            showProgressBar(false)
-            if (media == null)
-                mediaPickerCallback!!.onPickedError(null)
-            else
-                mediaPickerCallback!!.onPickedSuccess(media)
-            hideBottomSheet()
-        })
     }
 
     fun setMediaListenerCallback(type: Int, mediaPickerCallback: MediaPickerCallback?) {
@@ -415,11 +412,12 @@ open class BottomSheetFilePicker : BaseBottomSheet(), OnClickListener {
             return false
         }
 
-        fun getFileUri(file: File?): Uri {
+        fun getFileUri(file: File): Uri {
             return Uri.fromFile(file)
         }
 
-        fun getFileUri(path: String?): Uri {
+        fun getFileUri(path: String?): Uri? {
+            if (path == null) return null
             return getFileUri(File(path))
         }
     }

@@ -15,7 +15,7 @@ allprojects {
 Step 2. Add the dependency
 ```
 dependencies {
-    implementation 'com.github.dhaval-baldha1812:MediaFilePicker:Tag'
+    implementation 'com.github.dhaval-baldha1812:MediaFilePicker:release_version'
 }
 ```
 
@@ -60,4 +60,7 @@ bottomSheetFilePicker.actionButtonTextColor = R.color.purple_500
 // change cancel button text color
 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
 ```
+
+**File Pick Options**
+
 

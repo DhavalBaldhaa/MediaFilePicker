@@ -21,7 +21,7 @@ allprojects {
 Step 2. Add the dependency
 ```
 dependencies {
-    implementation 'com.github.dhaval-baldha1812:MediaFilePicker:release_version'
+    implementation 'com.github.DhavalBaldhaa:MediaFilePicker:release_version'
 }
 ```
 

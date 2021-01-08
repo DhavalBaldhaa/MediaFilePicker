@@ -7,10 +7,11 @@ import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.format.DateUtils
+import android.util.Base64
 import com.devstree.mediafilepicker.enumeration.ActionState
 import com.devstree.mediafilepicker.enumeration.MediaType
 import com.devstree.mediafilepicker.utils.FileUtil
-import java.io.File
+import java.io.*
 import java.util.*
 
 class Media : Parcelable {
@@ -32,22 +33,8 @@ class Media : Parcelable {
     var longitude: String? = null
     var description: String? = null
 
-    // add duration in seconds
-//    val mediaMetaData: MediaMetaData
-//        get() {
-//            val infoData = MediaMetaData()
-//            infoData.mediaUrl =
-//                getDownloadPath(Controller.instance).takeIf { isDownloadableFileExist(Controller.instance) }
-//                    ?: remoteUrl
-//
-//            infoData.mediaId = infoData.mediaUrl
-//            infoData.mediaTitle = MediaType.AUDIO.getName()
-//            infoData.mediaArtist = ""
-//            infoData.mediaAlbum = ""
-//            infoData.mediaDuration = totalDuration.toString() // add duration in seconds
-//            //infoData.setMediaArt("Media album image goes here");
-//            return infoData
-//        }
+    private var base64: String? = null
+
 
     val totalDuration: Int get() = (duration / 1000).toInt()
 
@@ -140,6 +127,7 @@ class Media : Parcelable {
         media.latitude = latitude
         media.longitude = longitude
         media.description = description
+        media.base64 = base64
         return media
     }
 
@@ -244,6 +232,7 @@ class Media : Parcelable {
                 media.thumbUrl = thumb.thumb?.path
                 media.thumb = thumb.bytes
             }
+            media.getBase64()
             return media
         }
 
@@ -258,7 +247,50 @@ class Media : Parcelable {
                 media.thumbUrl = thumb.thumb?.path
                 media.thumb = thumb.bytes
             }
+            media.getBase64()
             return media
         }
     }
+
+    fun getBase64(): String? {
+        if (!base64.isNullOrEmpty()) return base64
+        try {
+            var bytesRead: Int
+            val buffer = ByteArray(8192)
+            val inputStream: InputStream = FileInputStream(localFile)
+            val output = ByteArrayOutputStream()
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                output.write(buffer, 0, bytesRead)
+            }
+            return Base64.encodeToString(output.toByteArray(), Base64.DEFAULT).also {
+                base64 = it
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
+    fun hasBase64(): Boolean {
+        return !base64.isNullOrEmpty()
+    }
+
+
+    // add duration in seconds
+//    val mediaMetaData: MediaMetaData
+//        get() {
+//            val infoData = MediaMetaData()
+//            infoData.mediaUrl =
+//                getDownloadPath(Controller.instance).takeIf { isDownloadableFileExist(Controller.instance) }
+//                    ?: remoteUrl
+//
+//            infoData.mediaId = infoData.mediaUrl
+//            infoData.mediaTitle = MediaType.AUDIO.getName()
+//            infoData.mediaArtist = ""
+//            infoData.mediaAlbum = ""
+//            infoData.mediaDuration = totalDuration.toString() // add duration in seconds
+//            //infoData.setMediaArt("Media album image goes here");
+//            return infoData
+//        }
+
 }

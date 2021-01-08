@@ -15,7 +15,6 @@ import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import com.devstree.mediafilepicker.BuildConfig
 import com.devstree.mediafilepicker.enumeration.MediaType
 import com.devstree.mediafilepicker.model.Media
 import com.devstree.mediafilepicker.model.Thumb
@@ -631,18 +630,6 @@ object FileUtil {
         }
     }
 
-//    fun intentMap(context: Context, media: Media) {
-//        try {
-//            val intent = Intent(Intent.ACTION_VIEW,
-//                Uri.parse("geo:" + media.latitude + "," + media.longitude + "?q=" + media.latitude + "," + media.longitude))
-//            context.startActivity(intent)
-//        } catch (e: ActivityNotFoundException) {
-//            Toast("Unable to open file, Couldn't find any installed app to open this media")
-//            e.printStackTrace()
-//        }
-//    }
-
-
     fun initGalleryScanner(context: Context, file: File) {
         MediaScannerClient(context, file).connect()
         val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
@@ -662,16 +649,6 @@ object FileUtil {
         return name
     }
 
-    //    public static void openVCard(Context context, VCard vCard) {
-    //        try {
-    //            Intent intent = new Intent(Intent.ACTION_VIEW);
-    //            Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(vCard.getProductId().getValue()));
-    //            intent.setData(uri);
-    //            context.startActivity(intent);
-    //        } catch (Exception e) {
-    //            e.printStackTrace();
-    //        }
-    //    }
     fun openVCard(context: Context, file: File?) {
         try {
             val intent = Intent()
@@ -704,20 +681,5 @@ object FileUtil {
         }
     }
 
-    //    public static void intentContact(Context context, VCard vCard) {
-    //        Intent intent = new Intent(Intent.ACTION_INSERT);
-    //        intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
-    //        intent.putExtra(ContactsContract.Intents.Insert.NAME, vCard.getFormattedName().getValue());
-    //        if (vCard.getTelephoneNumbers() != null && vCard.getTelephoneNumbers().size() > 0) {
-    //            Telephone telephone = vCard.getTelephoneNumbers().get(0);
-    //            intent.putExtra(ContactsContract.Intents.Insert.PHONE, telephone.getText());
-    //        }
-    ////        intent.putExtra(ContactsContract.Intents.Insert.EMAIL, person.email);
-    //        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    //        try {
-    //            context.startActivity(intent);
-    //        } catch (Exception e) {
-    //            e.printStackTrace();
-    //        }
-    //    }
+
 }

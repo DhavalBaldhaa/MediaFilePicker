@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 val bottomSheetFilePicker = BottomSheetFilePicker(BuildConfig.APPLICATION_ID)
                 bottomSheetFilePicker.actionButtonBg = R.drawable.button_bg
                 bottomSheetFilePicker.cancelButtonBg = R.drawable.button_bg_filled
-                bottomSheetFilePicker.actionButtonTextColor = R.color.purple_500
+                bottomSheetFilePicker.actionButtonTextColor = R.color.green
                 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
                 bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.IMAGE, object : MediaPickerCallback {
                     override fun onPickedSuccess(media: Media?) {
@@ -51,7 +51,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     }
                 })
                 bottomSheetFilePicker.show(supportFragmentManager, "take_all")
-                bottomSheetFilePicker.setAction(BottomSheetFilePicker.TAKE_PHOTO)
             }
         }
     }

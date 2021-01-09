@@ -59,11 +59,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
     @ColorRes
     var cancelButtonTextColor: Int? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = BottomSheetCameraDialogBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -128,19 +124,14 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 
         if (actionButtonTextColor != null) {
             with(binding) {
-                btnTakePhoto.setTextColor(actionButtonTextColor!!)
-                btnChooseImage.setTextColor(actionButtonTextColor!!)
-                btnTakeVideo.setTextColor(actionButtonTextColor!!)
-                btnChooseVideo.setTextColor(actionButtonTextColor!!)
+                btnTakePhoto.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
+                btnChooseImage.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
+                btnTakeVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
+                btnChooseVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
             }
         }
         if (cancelButtonBg != null) binding.btnCancel.setBackgroundResource(cancelButtonBg!!)
-        if (cancelButtonTextColor != null) binding.btnCancel.setTextColor(
-            ContextCompat.getColor(
-                requireContext(),
-                cancelButtonTextColor!!
-            )
-        )
+        if (cancelButtonTextColor != null) binding.btnCancel.setTextColor(ContextCompat.getColor(requireContext(), cancelButtonTextColor!!))
     }
 
     override fun onClick(view: View) {

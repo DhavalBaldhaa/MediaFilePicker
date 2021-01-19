@@ -32,6 +32,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
+import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks
 import java.io.File
 
 /**
@@ -68,7 +69,11 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         super.onViewCreated(view, savedInstanceState)
         mapping()
         if (directAction) {
-            selectFile()
+            if (action == PICK_CONTACT) {
+                selectContact()
+            } else {
+                selectFile()
+            }
         }
     }
 
@@ -158,22 +163,19 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 
     private fun requestPermission(): Boolean {
         if (EasyPermissions.hasPermissions(mContext, *permissions)) return true
-        requestPermissions(
-            this,
-            getString(R.string.permission_camera_rationale),
-            REQUEST_PERMISSION,
-            permissions
-        )
+        requestPermissions(this, getString(R.string.permission_camera_rationale), REQUEST_PERMISSION, permissions)
         return false
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
+    private fun requestContactPermission(): Boolean {
+        if (EasyPermissions.hasPermissions(mContext, *contact_permission)) return true
+        requestPermissions(this, getString(R.string.permission_contact_rationale), REQUEST_CONTACT_PERMISSION, contact_permission)
+        return false
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, permissionCallbacks)
     }
 
 //    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
@@ -182,6 +184,24 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 //    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
 //        hideBottomSheet()
 //    }
+
+    val permissionCallbacks = object : PermissionCallbacks {
+        override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+
+        }
+
+        override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+            if (requestCode == REQUEST_CONTACT_PERMISSION) {
+                selectContact()
+            } else {
+                selectFile()
+            }
+        }
+
+        override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+            hideBottomSheet()
+        }
+    }
 
     @AfterPermissionGranted(REQUEST_PERMISSION)
     private fun selectFile() {
@@ -234,12 +254,15 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             startActivityForResult(Intent.createChooser(intent, "Pick File"), action)
-
-        } else if (action == PICK_CONTACT) {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE
-            startActivityForResult(intent, PICK_CONTACT)
         }
+    }
+
+    @AfterPermissionGranted(REQUEST_CONTACT_PERMISSION)
+    private fun selectContact() {
+        if (!requestContactPermission()) return
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE
+        startActivityForResult(intent, PICK_CONTACT)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -335,7 +358,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                     }
                 }
                 PICK_CONTACT -> {
-//                if (intent!!.data == null) return
+                    if (intent!!.data == null) return@launch
 //                media = Media.create(Ezvcard.write(readContactFromUri(context, intent.data)).version(VCardVersion.V4_0).go())
                 }
             }
@@ -371,29 +394,20 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 
     companion object {
         private val permissions = if (VERSION.SDK_INT >= VERSION_CODES.Q) {
-            arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.ACCESS_MEDIA_LOCATION,
-                Manifest.permission.READ_CONTACTS
-            )
+            arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
         } else {
-            arrayOf(
-                Manifest.permission.CAMERA,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_CONTACTS
-            )
+            arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
-        private val PROJECTION = arrayOf(
-            ContactsContract.CommonDataKinds.Phone.NUMBER,
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-        )
+
+        private val contact_permission = arrayOf(Manifest.permission.READ_CONTACTS)
+        private val PROJECTION = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+
         private const val VIDEO_LIMIT = 10
         const val IMAGE = 1
         const val VIDEO = 2
         const val TEXT = 3
         private const val REQUEST_PERMISSION = 101
+        private const val REQUEST_CONTACT_PERMISSION = 102
         const val TAKE_PHOTO = 1
         const val CHOOSE_IMAGE_FROM_GALLERY = 2
         const val CROP_REQUEST = 3

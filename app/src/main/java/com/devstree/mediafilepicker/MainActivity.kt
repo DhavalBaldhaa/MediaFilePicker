@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 bottomSheetFilePicker.cancelButtonBg = R.drawable.button_bg_filled
                 bottomSheetFilePicker.actionButtonTextColor = R.color.green
                 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
-                bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.IMAGE, object : MediaPickerCallback {
+                bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.TAKE_ALL, object : MediaPickerCallback {
                     override fun onPickedSuccess(media: Media?) {
                         if (media == null) return
                         Glide
@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     }
                 })
                 bottomSheetFilePicker.show(supportFragmentManager, "take_all")
+//                bottomSheetFilePicker.setAction(BottomSheetFilePicker.PICK_IMAGE)
             }
         }
     }

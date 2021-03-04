@@ -191,7 +191,7 @@ class Media : Parcelable {
         dest.writeByteArray(thumb)
         dest.writeLong(size)
         dest.writeLong(duration)
-        dest.writeString(mediaType.getName())
+        dest.writeString(mediaType.name)
         dest.writeFloat(progress)
         dest.writeString(actionState.value)
         dest.writeInt(playbackDuration)

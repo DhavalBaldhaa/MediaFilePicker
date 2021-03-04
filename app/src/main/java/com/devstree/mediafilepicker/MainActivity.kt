@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                             .into(binding.imgMedia)
 
                         binding.txtMediaDetails.text =
-                            String.format("Media type : ${media.mediaType.getName()} \n" +
+                            String.format("Media type : ${media.mediaType.name} \n" +
                                     "Media file name : ${media.filename} \n" +
                                     "Media file path : ${media.getNotNullUrl()}"
                             )

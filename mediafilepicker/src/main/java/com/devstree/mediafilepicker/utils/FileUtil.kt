@@ -116,7 +116,7 @@ object FileUtil {
         val extension = MediaType.getExtension(mediaType)
         return File(
             root,
-            mediaType.getName() + UNDER_SCORE + System.currentTimeMillis() + extension
+            mediaType.name + UNDER_SCORE + System.currentTimeMillis() + extension
         )
     }
 
@@ -125,13 +125,13 @@ object FileUtil {
         val root = MediaType.getRootDirectory(context, mediaType)
         ext = prefixIsNotThere(ext, DOT)
         ext = ext ?: MediaType.getExtension(mediaType)
-        return File(root, mediaType.getName() + UNDER_SCORE + System.currentTimeMillis() + ext)
+        return File(root, mediaType.name + UNDER_SCORE + System.currentTimeMillis() + ext)
     }
 
     fun createFile(context: Context?, file_name: String, mediaType: MediaType): File {
         val root = MediaType.getRootDirectory(context, mediaType)
         val extension = MediaType.getExtension(mediaType)
-        return File(root, mediaType.getName() + UNDER_SCORE + file_name + extension)
+        return File(root, mediaType.name + UNDER_SCORE + file_name + extension)
     }
 
     fun createNewFile(

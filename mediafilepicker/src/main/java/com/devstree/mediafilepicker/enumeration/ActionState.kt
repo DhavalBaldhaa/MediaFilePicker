@@ -22,6 +22,7 @@ enum class ActionState(private val id: Int, val value: String) : Parcelable {
     }
 
     companion object {
+        @JvmField
         val CREATOR: Parcelable.Creator<ActionState> = object : Parcelable.Creator<ActionState> {
             override fun createFromParcel(parcel: Parcel): ActionState {
                 return values()[parcel.readInt()]

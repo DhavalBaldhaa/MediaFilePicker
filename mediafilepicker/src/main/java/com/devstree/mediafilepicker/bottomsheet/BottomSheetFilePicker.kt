@@ -23,6 +23,8 @@ import androidx.core.content.ContextCompat
 import com.devstree.mediafilepicker.R
 import com.devstree.mediafilepicker.databinding.BottomSheetCameraDialogBinding
 import com.devstree.mediafilepicker.enumeration.MediaType
+import com.devstree.mediafilepicker.enumeration.SelectionType
+import com.devstree.mediafilepicker.enumeration.SelectionType.*
 import com.devstree.mediafilepicker.listener.MediaPickerCallback
 import com.devstree.mediafilepicker.model.Media
 import com.devstree.mediafilepicker.model.Thumb
@@ -42,8 +44,8 @@ import java.io.File
 // refer : https://developer.android.com/training/data-storage/shared/media#request-permissions
 open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(), OnClickListener {
     private var file: File? = null
-    private var type = IMAGE
-    private var action = TAKE_PHOTO
+    private var selectionType = ALL
+    private var action = TAKE_IMAGE
     private var directAction = false
     private var mediaPickerCallback: MediaPickerCallback? = null
     private lateinit var binding: BottomSheetCameraDialogBinding
@@ -68,12 +70,10 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapping()
+        updateUi()
         if (directAction) {
-            if (action == PICK_CONTACT) {
-                selectContact()
-            } else {
-                selectFile()
-            }
+            if (action == PICK_CONTACT) selectContact()
+            else selectFile()
         }
     }
 
@@ -92,32 +92,70 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         binding.btnChooseVideo.setOnClickListener(this)
         binding.btnCancel.setOnClickListener(this)
 
-        if (type == TAKE_ALL) {
-            binding.btnTakePhoto.visibility = VISIBLE
-            binding.btnChooseImage.visibility = VISIBLE
-            binding.btnTakeVideo.visibility = VISIBLE
-            binding.btnChooseVideo.visibility = VISIBLE
-        } else if (type == PICK_IMAGE_VIDEO) {
-            binding.btnTakePhoto.visibility = GONE
-            binding.btnTakeVideo.visibility = GONE
-            binding.btnChooseImage.visibility = VISIBLE
-            binding.btnChooseVideo.visibility = VISIBLE
-        } else if (type == PICK_IMAGE) {
-            binding.btnTakePhoto.visibility = GONE
-            binding.btnTakeVideo.visibility = GONE
-            binding.btnChooseImage.visibility = GONE
-            binding.btnChooseVideo.visibility = GONE
-            binding.btnCancel.visibility = GONE
-        } else if (type == IMAGE) {
-            binding.btnTakePhoto.visibility = VISIBLE
-            binding.btnTakeVideo.visibility = GONE
-            binding.btnChooseVideo.visibility = GONE
-        } else if (type == VIDEO) {
-            binding.btnTakePhoto.visibility = GONE
-            binding.btnChooseImage.visibility = GONE
-            binding.btnTakeVideo.visibility = VISIBLE
-        }
+        binding.btnTakePhoto.visibility = GONE
+        binding.btnChooseImage.visibility = GONE
+        binding.btnTakeVideo.visibility = GONE
+        binding.btnChooseVideo.visibility = GONE
 
+        when (selectionType) {
+            ALL -> {
+                binding.btnTakePhoto.visibility = VISIBLE
+                binding.btnChooseImage.visibility = VISIBLE
+                binding.btnTakeVideo.visibility = VISIBLE
+                binding.btnChooseVideo.visibility = VISIBLE
+            }
+
+            IMAGE -> {
+                binding.btnTakePhoto.visibility = VISIBLE
+                binding.btnChooseImage.visibility = VISIBLE
+            }
+
+            VIDEO -> {
+                binding.btnTakeVideo.visibility = VISIBLE
+                binding.btnChooseVideo.visibility = VISIBLE
+            }
+
+            TAKE_IMAGE -> {
+                binding.btnTakePhoto.visibility = VISIBLE
+                directAction = true
+                action = TAKE_IMAGE
+            }
+
+            TAKE_VIDEO -> {
+                binding.btnTakeVideo.visibility = VISIBLE
+                directAction = true
+                action = TAKE_VIDEO
+            }
+
+            TAKE_IMAGE_VIDEO -> {
+                binding.btnTakePhoto.visibility = VISIBLE
+                binding.btnTakeVideo.visibility = VISIBLE
+            }
+
+            PICK_IMAGE -> {
+                binding.btnChooseImage.visibility = VISIBLE
+                directAction = true
+                action = PICK_IMAGE
+            }
+
+            PICK_VIDEO -> {
+                binding.btnChooseVideo.visibility = VISIBLE
+                directAction = true
+                action = PICK_IMAGE
+            }
+
+            PICK_IMAGE_VIDEO -> {
+                binding.btnChooseImage.visibility = VISIBLE
+                binding.btnChooseVideo.visibility = VISIBLE
+            }
+            PICK_CONTACT -> {
+                directAction = true
+                action = PICK_CONTACT
+            }
+        }
+    }
+
+    fun updateUi() {
         if (actionButtonBg != null) {
             with(binding) {
                 btnTakePhoto.setBackgroundResource(actionButtonBg!!)
@@ -126,7 +164,6 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                 btnChooseVideo.setBackgroundResource(actionButtonBg!!)
             }
         }
-
         if (actionButtonTextColor != null) {
             with(binding) {
                 btnTakePhoto.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
@@ -135,15 +172,19 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                 btnChooseVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
             }
         }
-        if (cancelButtonBg != null) binding.btnCancel.setBackgroundResource(cancelButtonBg!!)
-        if (cancelButtonTextColor != null) binding.btnCancel.setTextColor(ContextCompat.getColor(requireContext(), cancelButtonTextColor!!))
+        if (cancelButtonBg != null) {
+            binding.btnCancel.setBackgroundResource(cancelButtonBg!!)
+        }
+        if (cancelButtonTextColor != null) {
+            binding.btnCancel.setTextColor(ContextCompat.getColor(requireContext(), cancelButtonTextColor!!))
+        }
     }
 
     override fun onClick(view: View) {
         when (view) {
             binding.btnCancel -> hideBottomSheet()
             binding.btnTakePhoto -> {
-                action = TAKE_PHOTO
+                action = TAKE_IMAGE
                 selectFile()
             }
             binding.btnTakeVideo -> {
@@ -151,11 +192,11 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                 selectFile()
             }
             binding.btnChooseImage -> {
-                action = CHOOSE_IMAGE_FROM_GALLERY
+                action = PICK_IMAGE
                 selectFile()
             }
             binding.btnChooseVideo -> {
-                action = CHOOSE_VIDEO_FROM_GALLERY
+                action = PICK_VIDEO
                 selectFile()
             }
         }
@@ -178,13 +219,6 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, permissionCallbacks)
     }
 
-//    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
-//    }
-//
-//    override fun onPermissionsDenied(requestCode: Int, perms: List<String>) {
-//        hideBottomSheet()
-//    }
-
     val permissionCallbacks = object : PermissionCallbacks {
         override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
 
@@ -206,9 +240,9 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
     @AfterPermissionGranted(REQUEST_PERMISSION)
     private fun selectFile() {
         if (!requestPermission()) return
-        if (action == TAKE_PHOTO || action == TAKE_VIDEO) {
+        if (action == TAKE_IMAGE || action == TAKE_VIDEO) {
             val intent: Intent
-            if (action == TAKE_PHOTO) {
+            if (action == TAKE_IMAGE) {
                 intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                 file = FileUtil.createNewFile(context, MediaType.IMAGE)
             } else {
@@ -235,17 +269,17 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                     )
                 }
             }
-            startActivityForResult(Intent.createChooser(intent, "Capture Using"), action)
+            startActivityForResult(Intent.createChooser(intent, "Capture Using"), action.id)
 
-        } else if (action == CHOOSE_IMAGE_FROM_GALLERY) {
+        } else if (action == PICK_IMAGE) {
             val intent = Intent(Intent.ACTION_PICK)
             intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
-            startActivityForResult(Intent.createChooser(intent, "Select Photo"), action)
+            startActivityForResult(Intent.createChooser(intent, "Select Photo"), action.id)
 
-        } else if (action == CHOOSE_VIDEO_FROM_GALLERY) {
+        } else if (action == PICK_VIDEO) {
             val intent = Intent(Intent.ACTION_PICK)
             intent.setDataAndType(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "video/*")
-            startActivityForResult(Intent.createChooser(intent, "Select Video"), action)
+            startActivityForResult(Intent.createChooser(intent, "Select Video"), action.id)
 
         } else if (action == PICK_DOCUMENT) {
             val intent = Intent(Intent.ACTION_GET_CONTENT)
@@ -253,7 +287,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
             intent.addCategory(Intent.CATEGORY_OPENABLE)
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-            startActivityForResult(Intent.createChooser(intent, "Pick File"), action)
+            startActivityForResult(Intent.createChooser(intent, "Pick File"), action.id)
         }
     }
 
@@ -262,7 +296,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         if (!requestContactPermission()) return
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE
-        startActivityForResult(intent, PICK_CONTACT)
+        startActivityForResult(intent, PICK_CONTACT.id)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -292,7 +326,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         GlobalScope.launch {
             var media: Media? = null
             when (requestCode) {
-                TAKE_PHOTO -> {
+                TAKE_IMAGE.id -> {
                     try {
                         if (context == null) return@launch
                         if (file == null) return@launch
@@ -307,7 +341,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                         media = null
                     }
                 }
-                CHOOSE_IMAGE_FROM_GALLERY -> {
+                PICK_IMAGE.id -> {
 //                file = FileUtil.getNewPath(context, intent.getData(), MediaType.IMAGE);
                     try {
                         if (context == null) return@launch
@@ -325,11 +359,11 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                         media = null
                     }
                 }
-                TAKE_VIDEO -> {
+                TAKE_VIDEO.id -> {
                     if (file != null) media =
                         Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
                 }
-                CHOOSE_VIDEO_FROM_GALLERY -> {
+                PICK_VIDEO.id -> {
                     //              trimRequest(data.getUser());
 //                file = FileUtil.getNewPath(context, intent.getData(), MediaType.VIDEO);
                     file = FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.VIDEO)
@@ -342,7 +376,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                     if (file == null) return@launch
                     media = Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
                 }
-                PICK_DOCUMENT -> {
+                PICK_DOCUMENT.id -> {
                     try {
                         if (intent!!.data == null) return@launch
                         file = FileUtil.getFileFromUri(
@@ -357,7 +391,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                         media = null
                     }
                 }
-                PICK_CONTACT -> {
+                PICK_CONTACT.id -> {
                     if (intent!!.data == null) return@launch
 //                media = Media.create(Ezvcard.write(readContactFromUri(context, intent.data)).version(VCardVersion.V4_0).go())
                 }
@@ -374,12 +408,12 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         }
     }
 
-    fun setMediaListenerCallback(type: Int, mediaPickerCallback: MediaPickerCallback?) {
-        this.type = type
+    fun setMediaListenerCallback(type: SelectionType, mediaPickerCallback: MediaPickerCallback?) {
+        this.selectionType = type
         this.mediaPickerCallback = mediaPickerCallback
     }
 
-    fun setAction(action: Int) {
+    fun setAction(action: SelectionType) {
         this.action = action
         directAction = true
     }
@@ -403,22 +437,10 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         private val PROJECTION = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
 
         private const val VIDEO_LIMIT = 10
-        const val IMAGE = 1
-        const val VIDEO = 2
-        const val TEXT = 3
         private const val REQUEST_PERMISSION = 101
         private const val REQUEST_CONTACT_PERMISSION = 102
-        const val TAKE_PHOTO = 1
-        const val CHOOSE_IMAGE_FROM_GALLERY = 2
-        const val CROP_REQUEST = 3
-        const val TAKE_VIDEO = 4
-        const val CHOOSE_VIDEO_FROM_GALLERY = 5
-        const val TRIM_VIDEO = 6
-        const val PICK_IMAGE_VIDEO = 7
-        const val TAKE_ALL = 8
-        const val PICK_DOCUMENT = 9
-        const val PICK_CONTACT = 10
-        const val PICK_IMAGE = 11
+        private const val CROP_REQUEST = 103
+
         fun isCorrectLimit(context: Context?, uri: Uri?): Boolean {
             try {
                 val mp = MediaPlayer.create(context, uri)

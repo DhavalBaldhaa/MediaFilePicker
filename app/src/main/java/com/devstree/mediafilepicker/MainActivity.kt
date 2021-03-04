@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.devstree.mediafilepicker.bottomsheet.BottomSheetFilePicker
 import com.devstree.mediafilepicker.databinding.ActivityMainBinding
+import com.devstree.mediafilepicker.enumeration.SelectionType
 import com.devstree.mediafilepicker.listener.MediaPickerCallback
 import com.devstree.mediafilepicker.model.Media
 
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 bottomSheetFilePicker.cancelButtonBg = R.drawable.button_bg_filled
                 bottomSheetFilePicker.actionButtonTextColor = R.color.green
                 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
-                bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.TAKE_ALL, object : MediaPickerCallback {
+                bottomSheetFilePicker.setMediaListenerCallback(SelectionType.ALL, object : MediaPickerCallback {
                     override fun onPickedSuccess(media: Media?) {
                         if (media == null) return
                         Glide

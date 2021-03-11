@@ -22,10 +22,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v) {
             binding.btnOpenFilePicker -> {
-                val bottomSheetFilePicker = BottomSheetFilePicker(BuildConfig.APPLICATION_ID)
+                val bottomSheetFilePicker = BottomSheetFilePicker(BuildConfig.APPLICATION_ID, R.style.BaseBottomSheetDialog)
                 bottomSheetFilePicker.actionButtonBg = R.drawable.button_bg
-                bottomSheetFilePicker.cancelButtonBg = R.drawable.button_bg_filled
-                bottomSheetFilePicker.actionButtonTextColor = R.color.green
+                bottomSheetFilePicker.cancelButtonBg = R.drawable.button_bg_primary
+                bottomSheetFilePicker.actionButtonTextColor = R.color.purple_500
                 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
                 bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.TAKE_ALL, object : MediaPickerCallback {
                     override fun onPickedSuccess(media: Media?) {

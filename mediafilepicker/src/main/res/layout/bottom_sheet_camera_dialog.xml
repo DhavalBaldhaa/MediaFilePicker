@@ -5,7 +5,6 @@
     android:id="@+id/bottom_sheet_camera_dialog"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/shape_corner"
     android:elevation="@dimen/_5sdp"
     android:orientation="vertical"
     app:behavior_hideable="true"

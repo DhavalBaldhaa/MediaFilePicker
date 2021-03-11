@@ -9,7 +9,7 @@ of media file in your application. No need to manage any kind of extra
 permission or result method override. Just create library class instance
 and use it or also medify ui as your requirement.
 
-## Installation
+# Installation
 Step 1. Add the JitPack repository to your build file
 ```
 allprojects {
@@ -89,6 +89,23 @@ bottomSheetFilePicker.actionButtonTextColor = R.color.purple_500
 
 // change cancel button text color
 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
+```
+
+**Set Custom theme**
+You can set your custom theme and change your bottomsheet background
+```
+// Create theme
+<style name="BaseBottomSheetDialog" parent="@style/Theme.Design.Light.BottomSheetDialog">
+    <item name="android:windowIsFloating">false</item>
+    <item name="bottomSheetStyle">@style/BottomSheet</item>
+</style>
+
+<style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
+    <item name="android:background">@drawable/background</item>
+</style>
+
+// set your theme
+val bottomSheetFilePicker = BottomSheetFilePicker(BuildConfig.APPLICATION_ID, R.style.BaseBottomSheetDialog)
 ```
 
 ## Author

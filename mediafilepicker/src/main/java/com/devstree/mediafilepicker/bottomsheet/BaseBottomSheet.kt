@@ -16,6 +16,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.annotation.DrawableRes
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.devstree.mediafilepicker.R
 import com.devstree.mediafilepicker.databinding.BottomsheetHeaderBinding
@@ -31,14 +33,14 @@ import pub.devrel.easypermissions.PermissionRequest
  */
 
 open class BaseBottomSheet : BottomSheetDialogFragment(), OnShowListener {
-    //    protected var navigation: NavigationActivity? = null
-//    protected var base: BaseActivity? = null
     lateinit var mContext: Context
     private var expanded = false
     private var showKeyboard = false
-    protected var isApplyStyle = true
     var bottomSheetBehavior: BottomSheetBehavior<*>? = null
     private lateinit var binding: BottomsheetHeaderBinding
+
+    @DrawableRes
+    var themeId: Int? = null
 
     private val bottomSheetCallback: BottomSheetCallback = object : BottomSheetCallback() {
         override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -51,7 +53,7 @@ open class BaseBottomSheet : BottomSheetDialogFragment(), OnShowListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (isApplyStyle) setStyle(STYLE_NORMAL, R.style.BottomSheetDialogTheme)
+        setStyle(STYLE_NORMAL, themeId ?: R.style.MediaBaseBottomSheetDialog)
     }
 
     fun setUpHeader(title: String) {
@@ -64,13 +66,6 @@ open class BaseBottomSheet : BottomSheetDialogFragment(), OnShowListener {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         this.mContext = context
-//        if (context is BaseActivity) base = context
-//        if (context is NavigationActivity) navigation = context
-    }
-
-    override fun onPause() {
-        super.onPause()
-//        hideKeyboard(base)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -146,7 +141,7 @@ open class BaseBottomSheet : BottomSheetDialogFragment(), OnShowListener {
         window.callback = UserInteractionAwareCallback(window.callback, activity)
     }
 
-    companion object{
+    companion object {
         fun checkOnMainThread(): Boolean {
             return Looper.getMainLooper().thread == Thread.currentThread()
         }

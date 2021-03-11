@@ -19,6 +19,7 @@ import android.view.View.*
 import android.view.ViewGroup
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import com.devstree.mediafilepicker.R
 import com.devstree.mediafilepicker.databinding.BottomSheetCameraDialogBinding
@@ -60,6 +61,14 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
     @ColorRes
     var cancelButtonTextColor: Int? = null
 
+    constructor(applicationId: String, @StyleRes themeId: Int) : this(applicationId) {
+        this.themeId = themeId
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = BottomSheetCameraDialogBinding.inflate(inflater, container, false)
         return binding.root
@@ -92,49 +101,52 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         binding.btnChooseVideo.setOnClickListener(this)
         binding.btnCancel.setOnClickListener(this)
 
-        if (type == TAKE_ALL) {
-            binding.btnTakePhoto.visibility = VISIBLE
-            binding.btnChooseImage.visibility = VISIBLE
-            binding.btnTakeVideo.visibility = VISIBLE
-            binding.btnChooseVideo.visibility = VISIBLE
-        } else if (type == PICK_IMAGE_VIDEO) {
-            binding.btnTakePhoto.visibility = GONE
-            binding.btnTakeVideo.visibility = GONE
-            binding.btnChooseImage.visibility = VISIBLE
-            binding.btnChooseVideo.visibility = VISIBLE
-        } else if (type == PICK_IMAGE) {
-            binding.btnTakePhoto.visibility = GONE
-            binding.btnTakeVideo.visibility = GONE
-            binding.btnChooseImage.visibility = GONE
-            binding.btnChooseVideo.visibility = GONE
-            binding.btnCancel.visibility = GONE
-        } else if (type == IMAGE) {
-            binding.btnTakePhoto.visibility = VISIBLE
-            binding.btnTakeVideo.visibility = GONE
-            binding.btnChooseVideo.visibility = GONE
-        } else if (type == VIDEO) {
-            binding.btnTakePhoto.visibility = GONE
-            binding.btnChooseImage.visibility = GONE
-            binding.btnTakeVideo.visibility = VISIBLE
-        }
-
-        if (actionButtonBg != null) {
-            with(binding) {
-                btnTakePhoto.setBackgroundResource(actionButtonBg!!)
-                btnChooseImage.setBackgroundResource(actionButtonBg!!)
-                btnTakeVideo.setBackgroundResource(actionButtonBg!!)
-                btnChooseVideo.setBackgroundResource(actionButtonBg!!)
+        when (type) {
+            TAKE_ALL -> {
+                binding.btnTakePhoto.visibility = VISIBLE
+                binding.btnChooseImage.visibility = VISIBLE
+                binding.btnTakeVideo.visibility = VISIBLE
+                binding.btnChooseVideo.visibility = VISIBLE
+            }
+            PICK_IMAGE_VIDEO -> {
+                binding.btnTakePhoto.visibility = GONE
+                binding.btnTakeVideo.visibility = GONE
+                binding.btnChooseImage.visibility = VISIBLE
+                binding.btnChooseVideo.visibility = VISIBLE
+            }
+            PICK_IMAGE -> {
+                binding.btnTakePhoto.visibility = GONE
+                binding.btnTakeVideo.visibility = GONE
+                binding.btnChooseImage.visibility = GONE
+                binding.btnChooseVideo.visibility = GONE
+                binding.btnCancel.visibility = GONE
+            }
+            IMAGE -> {
+                binding.btnTakePhoto.visibility = VISIBLE
+                binding.btnTakeVideo.visibility = GONE
+                binding.btnChooseVideo.visibility = GONE
+            }
+            VIDEO -> {
+                binding.btnTakePhoto.visibility = GONE
+                binding.btnChooseImage.visibility = GONE
+                binding.btnTakeVideo.visibility = VISIBLE
             }
         }
 
-        if (actionButtonTextColor != null) {
-            with(binding) {
-                btnTakePhoto.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
-                btnChooseImage.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
-                btnTakeVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
-                btnChooseVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
-            }
+        if (actionButtonBg != null) with(binding) {
+            btnTakePhoto.setBackgroundResource(actionButtonBg!!)
+            btnChooseImage.setBackgroundResource(actionButtonBg!!)
+            btnTakeVideo.setBackgroundResource(actionButtonBg!!)
+            btnChooseVideo.setBackgroundResource(actionButtonBg!!)
         }
+
+        if (actionButtonTextColor != null) with(binding) {
+            btnTakePhoto.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
+            btnChooseImage.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
+            btnTakeVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
+            btnChooseVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
+        }
+
         if (cancelButtonBg != null) binding.btnCancel.setBackgroundResource(cancelButtonBg!!)
         if (cancelButtonTextColor != null) binding.btnCancel.setTextColor(ContextCompat.getColor(requireContext(), cancelButtonTextColor!!))
     }
@@ -185,7 +197,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 //        hideBottomSheet()
 //    }
 
-    val permissionCallbacks = object : PermissionCallbacks {
+    private val permissionCallbacks = object : PermissionCallbacks {
         override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
 
         }
@@ -296,11 +308,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                     try {
                         if (context == null) return@launch
                         if (file == null) return@launch
-                        file = FileUtil.imageCompress(
-                            mContext,
-                            file!!,
-                            MediaType.IMAGE
-                        ) // image compress
+                        file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
                         media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -314,11 +322,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                         file =
                             FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.IMAGE)
                         if (file == null) return@launch
-                        file = FileUtil.imageCompress(
-                            mContext,
-                            file!!,
-                            MediaType.IMAGE
-                        ) // image compress
+                        file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
                         media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
                     } catch (e: Exception) {
                         e.printStackTrace()

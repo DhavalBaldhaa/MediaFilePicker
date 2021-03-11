@@ -9,6 +9,8 @@ of media file in your application. No need to manage any kind of extra
 permission or result method override. Just create library class instance
 and use it or also medify ui as your requirement.
 
+![Alt text](/app/screenshots/img1.jpg)
+
 # Installation
 Step 1. Add the JitPack repository to your build file
 ```

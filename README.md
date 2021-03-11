@@ -9,7 +9,7 @@ of media file in your application. No need to manage any kind of extra
 permission or result method override. Just create library class instance
 and use it or also medify ui as your requirement.
 
-![Alt text](/app/screenshots/img1.jpg)
+<img src="https://github.com/DhavalBaldhaa/MediaFilePicker/blob/master/app/screenshots/img1.png" alt="screenshot" width="200" height="400"> 
 
 # Installation
 Step 1. Add the JitPack repository to your build file

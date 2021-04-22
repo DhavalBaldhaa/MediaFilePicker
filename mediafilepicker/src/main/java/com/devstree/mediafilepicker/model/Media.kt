@@ -32,8 +32,7 @@ class Media : Parcelable {
     var latitude: String? = null
     var longitude: String? = null
     var description: String? = null
-
-    private var base64: String? = null
+    var base64: String? = null
 
 
     val totalDuration: Int get() = (duration / 1000).toInt()
@@ -232,7 +231,7 @@ class Media : Parcelable {
                 media.thumbUrl = thumb.thumb?.path
                 media.thumb = thumb.bytes
             }
-            media.getBase64()
+            media.getBase64String()
             return media
         }
 
@@ -247,12 +246,12 @@ class Media : Parcelable {
                 media.thumbUrl = thumb.thumb?.path
                 media.thumb = thumb.bytes
             }
-            media.getBase64()
+            media.getBase64String()
             return media
         }
     }
 
-    fun getBase64(): String? {
+    fun getBase64String(): String? {
         if (!base64.isNullOrEmpty()) return base64
         try {
             var bytesRead: Int

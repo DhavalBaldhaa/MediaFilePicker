@@ -110,9 +110,6 @@ You can set your custom theme and change your bottomsheet background
 val bottomSheetFilePicker = BottomSheetFilePicker(BuildConfig.APPLICATION_ID, R.style.BaseBottomSheetDialog)
 ```
 
-## Author
-Maintained by [Dhaval Baldha](https://www.github.com/dhaval-baldha1812)
-
 ## Contribution
 [![GitHub contributors](https://img.shields.io/github/contributors/dhaval-baldha1812/MediaFilePicker.svg)](https://github.com/dhaval-baldha1812/MediaFilePicker/graphs/contributors)
 

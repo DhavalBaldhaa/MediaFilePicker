@@ -96,7 +96,7 @@ enum class MediaType(var id: Int) : Parcelable {
                 AUDIO -> getAudioDirectory(context)
                 GIF -> getImageDirectory(context)
                 DOCUMENT -> getDocumentDirectory(context)
-                PDF -> getVideoDirectory(context)
+                PDF -> getDocumentDirectory(context)
                 CONTACT -> getContactDirectory(context)
                 else -> getRootDirectory(context)
             }

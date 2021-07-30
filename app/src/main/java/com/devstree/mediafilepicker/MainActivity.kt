@@ -27,29 +27,33 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 bottomSheetFilePicker.cancelButtonBg = R.drawable.button_bg_primary
                 bottomSheetFilePicker.actionButtonTextColor = R.color.purple_500
                 bottomSheetFilePicker.cancelButtonTextColor = R.color.white
-                bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.TAKE_ALL, object : MediaPickerCallback {
-                    override fun onPickedSuccess(media: Media?) {
-                        if (media == null) return
-                        Glide
-                            .with(this@MainActivity)
-                            .load(media.getNotNullUrl())
-                            .centerCrop()
-                            .into(binding.imgMedia)
+                bottomSheetFilePicker.compressQuality = 20
+                bottomSheetFilePicker.setResolutionConstraint(250, 250)
 
-                        binding.txtMediaDetails.text =
-                            String.format("Media type : ${media.mediaType.name} \n" +
-                                    "Media file name : ${media.filename} \n" +
-                                    "Media file path : ${media.getNotNullUrl()}"
-                            )
-                    }
+                bottomSheetFilePicker.setMediaListenerCallback(BottomSheetFilePicker.TAKE_ALL,
+                    object : MediaPickerCallback {
+                        override fun onPickedSuccess(media: Media?) {
+                            if (media == null) return
+                            Glide
+                                .with(this@MainActivity)
+                                .load(media.getNotNullUrl())
+                                .centerCrop()
+                                .into(binding.imgMedia)
 
-                    override fun onPickedError(error: String?) {
-                        Toast.makeText(this@MainActivity, error, Toast.LENGTH_SHORT).show()
-                    }
+                            binding.txtMediaDetails.text =
+                                String.format("Media type : ${media.mediaType.name} \n" +
+                                        "Media file name : ${media.filename} \n" +
+                                        "Media file path : ${media.getNotNullUrl()}"
+                                )
+                        }
 
-                    override fun showProgressBar(enable: Boolean) {
-                    }
-                })
+                        override fun onPickedError(error: String?) {
+                            Toast.makeText(this@MainActivity, error, Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun showProgressBar(enable: Boolean) {
+                        }
+                    })
                 bottomSheetFilePicker.show(supportFragmentManager, "take_all")
 //                bottomSheetFilePicker.setAction(BottomSheetFilePicker.PICK_IMAGE)
             }

@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
 import android.media.ThumbnailUtils
 import android.net.Uri
@@ -19,9 +20,7 @@ import com.devstree.mediafilepicker.enumeration.MediaType
 import com.devstree.mediafilepicker.model.Media
 import com.devstree.mediafilepicker.model.Thumb
 import id.zelory.compressor.Compressor
-import id.zelory.compressor.constraint.destination
-import id.zelory.compressor.constraint.format
-import id.zelory.compressor.constraint.quality
+import id.zelory.compressor.constraint.*
 import java.io.*
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -138,7 +137,7 @@ object FileUtil {
         context: Context?,
         file_name: String,
         mediaType: MediaType?,
-        extension: String?
+        extension: String?,
     ): File {
         var filename = file_name
         val root = MediaType.getRootDirectory(context, mediaType)
@@ -231,7 +230,7 @@ object FileUtil {
         context: Context,
         raw_data: ByteArray,
         prefix: String,
-        extension: String?
+        extension: String?,
     ): File? {
         try {
             val file = createNewFile(context, prefix, extension)
@@ -424,29 +423,44 @@ object FileUtil {
         return extension
     }
 
-    fun compressToBitmap(
-        context: Context,
-        file: File?,
-        width: Int,
-        height: Int,
-        quality: Int
-    ): Bitmap? {
-//        try {
-//            return Compressor(context)
-//                .setMaxWidth(width).setMaxHeight(height)
-//                .setQuality(quality).setCompressFormat(Bitmap.CompressFormat.JPEG)
-//                .compressToBitmap(file)
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//        }
-        return null
-    }
 
     suspend fun imageCompress(context: Context, file: File, mediaType: MediaType): File {
         try {
             val compressedFile = Compressor.compress(context, file) {
                 quality(50)
-                format(Bitmap.CompressFormat.JPEG)
+                format(CompressFormat.JPEG)
+                destination(
+                    File(
+                        MediaType.getRootDirectory(
+                            context,
+                            mediaType
+                        ) + file.nameWithoutExtension + UNDER_SCORE + "compressed" + MediaType.getExtension(
+                            mediaType
+                        )
+                    )
+                )
+            }
+            if (file.exists()) file.delete()
+            return compressedFile
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return file
+    }
+
+    suspend fun imageCompress(
+        context: Context,
+        file: File,
+        mediaType: MediaType,
+        quality: Int = 50,
+        format: CompressFormat = CompressFormat.JPEG,
+        compressResolution: ResolutionConstraint? = null,
+    ): File {
+        try {
+            val compressedFile = Compressor.compress(context, file) {
+                quality(quality)
+                format(format)
+                if (compressResolution != null) constraint(compressResolution)
                 destination(
                     File(
                         MediaType.getRootDirectory(
@@ -489,7 +503,7 @@ object FileUtil {
             try {
                 val fos = FileOutputStream(outputFile)
                 val bos = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.WEBP, quality, bos)
+                bitmap.compress(CompressFormat.WEBP, quality, bos)
                 fos.write(bos.toByteArray())
                 fos.flush()
                 fos.close()
@@ -506,7 +520,7 @@ object FileUtil {
             try {
                 val fos = FileOutputStream(outputFile)
                 val bos = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.WEBP, 100, bos)
+                bitmap.compress(CompressFormat.WEBP, 100, bos)
                 fos.write(bos.toByteArray())
                 fos.flush()
                 fos.close()
@@ -536,7 +550,7 @@ object FileUtil {
 
     fun getCompressedByte(bitmap: Bitmap): ByteArray {
         val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 0, stream)
+        bitmap.compress(CompressFormat.JPEG, 0, stream)
         return stream.toByteArray()
     }
 

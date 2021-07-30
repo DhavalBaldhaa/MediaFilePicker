@@ -165,10 +165,10 @@ class Media : Parcelable {
         size = parcel.readLong()
         duration = parcel.readLong()
         mediaType =
-            MediaType.get(parcel.readString()) //parcel.readParcelable(MediaType::class.java.classLoader) ?: MediaType.IMAGE
+            MediaType[parcel.readString()] //parcel.readParcelable(MediaType::class.java.classLoader) ?: MediaType.IMAGE
         progress = parcel.readFloat()
         actionState =
-            ActionState.get(parcel.readString()) //parcel.readParcelable(ActionState::class.java.classLoader) ?: ActionState.NONE
+            ActionState[parcel.readString()] //parcel.readParcelable(ActionState::class.java.classLoader) ?: ActionState.NONE
         playbackDuration = parcel.readInt()
         isLocal = parcel.readByte() != 0.toByte()
         latitude = parcel.readString()
@@ -231,7 +231,7 @@ class Media : Parcelable {
                 media.thumbUrl = thumb.thumb?.path
                 media.thumb = thumb.bytes
             }
-            media.getBase64String()
+//            media.getBase64String()
             return media
         }
 
@@ -246,7 +246,7 @@ class Media : Parcelable {
                 media.thumbUrl = thumb.thumb?.path
                 media.thumb = thumb.bytes
             }
-            media.getBase64String()
+//            media.getBase64String()
             return media
         }
     }

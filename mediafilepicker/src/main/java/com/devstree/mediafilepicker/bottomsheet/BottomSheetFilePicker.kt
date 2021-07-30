@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build.VERSION
@@ -28,7 +29,10 @@ import com.devstree.mediafilepicker.listener.MediaPickerCallback
 import com.devstree.mediafilepicker.model.Media
 import com.devstree.mediafilepicker.model.Thumb
 import com.devstree.mediafilepicker.utils.FileUtil
+import com.devstree.mediafilepicker.utils.FileUtil.getFileFromUri
+import com.devstree.mediafilepicker.utils.FileUtil.imageCompress
 import com.devstree.mediafilepicker.utils.MediaLog
+import id.zelory.compressor.constraint.ResolutionConstraint
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.AfterPermissionGranted
@@ -41,7 +45,8 @@ import java.io.File
  */
 
 // refer : https://developer.android.com/training/data-storage/shared/media#request-permissions
-open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(), OnClickListener {
+open class BottomSheetFilePicker(private val applicationId: String) : BaseBottomSheet(),
+    OnClickListener {
     private var file: File? = null
     private var type = IMAGE
     private var action = TAKE_PHOTO
@@ -61,6 +66,10 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
     @ColorRes
     var cancelButtonTextColor: Int? = null
 
+    var compressQuality: Int = 50
+    var compressFormat: Bitmap.CompressFormat = Bitmap.CompressFormat.JPEG
+    private var compressResolution: ResolutionConstraint? = null
+
     constructor(applicationId: String, @StyleRes themeId: Int) : this(applicationId) {
         this.themeId = themeId
     }
@@ -69,7 +78,11 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         super.onCreate(savedInstanceState)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View? {
         binding = BottomSheetCameraDialogBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -141,14 +154,20 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         }
 
         if (actionButtonTextColor != null) with(binding) {
-            btnTakePhoto.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
-            btnChooseImage.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
-            btnTakeVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
-            btnChooseVideo.setTextColor(ContextCompat.getColor(requireContext(), actionButtonTextColor!!))
+            btnTakePhoto.setTextColor(ContextCompat.getColor(requireContext(),
+                actionButtonTextColor!!))
+            btnChooseImage.setTextColor(ContextCompat.getColor(requireContext(),
+                actionButtonTextColor!!))
+            btnTakeVideo.setTextColor(ContextCompat.getColor(requireContext(),
+                actionButtonTextColor!!))
+            btnChooseVideo.setTextColor(ContextCompat.getColor(requireContext(),
+                actionButtonTextColor!!))
         }
 
         if (cancelButtonBg != null) binding.btnCancel.setBackgroundResource(cancelButtonBg!!)
-        if (cancelButtonTextColor != null) binding.btnCancel.setTextColor(ContextCompat.getColor(requireContext(), cancelButtonTextColor!!))
+        if (cancelButtonTextColor != null) binding.btnCancel.setTextColor(ContextCompat.getColor(
+            requireContext(),
+            cancelButtonTextColor!!))
     }
 
     override fun onClick(view: View) {
@@ -175,19 +194,32 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 
     private fun requestPermission(): Boolean {
         if (EasyPermissions.hasPermissions(mContext, *permissions)) return true
-        requestPermissions(this, getString(R.string.permission_camera_rationale), REQUEST_PERMISSION, permissions)
+        requestPermissions(this,
+            getString(R.string.permission_camera_rationale),
+            REQUEST_PERMISSION,
+            permissions)
         return false
     }
 
     private fun requestContactPermission(): Boolean {
         if (EasyPermissions.hasPermissions(mContext, *contact_permission)) return true
-        requestPermissions(this, getString(R.string.permission_contact_rationale), REQUEST_CONTACT_PERMISSION, contact_permission)
+        requestPermissions(this,
+            getString(R.string.permission_contact_rationale),
+            REQUEST_CONTACT_PERMISSION,
+            contact_permission)
         return false
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray,
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, permissionCallbacks)
+        EasyPermissions.onRequestPermissionsResult(requestCode,
+            permissions,
+            grantResults,
+            permissionCallbacks)
     }
 
 //    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
@@ -198,7 +230,11 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 //    }
 
     private val permissionCallbacks = object : PermissionCallbacks {
-        override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray,
+        ) {
 
         }
 
@@ -308,7 +344,12 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                     try {
                         if (context == null) return@launch
                         if (file == null) return@launch
-                        file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
+                        file = imageCompress(mContext,
+                            file!!,
+                            MediaType.IMAGE,
+                            compressQuality,
+                            compressFormat,
+                            compressResolution) // image compress
                         media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -319,10 +360,13 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 //                file = FileUtil.getNewPath(context, intent.getData(), MediaType.IMAGE);
                     try {
                         if (context == null) return@launch
-                        file =
-                            FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.IMAGE)
+                        file = getFileFromUri(mContext, intent!!.data, MediaType.IMAGE)
                         if (file == null) return@launch
-                        file = FileUtil.imageCompress(mContext, file!!, MediaType.IMAGE) // image compress
+                        file = imageCompress(mContext,
+                            file!!,
+                            MediaType.IMAGE, compressQuality,
+                            compressFormat,
+                            compressResolution) // image compress
                         media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -336,7 +380,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                 CHOOSE_VIDEO_FROM_GALLERY -> {
                     //              trimRequest(data.getUser());
 //                file = FileUtil.getNewPath(context, intent.getData(), MediaType.VIDEO);
-                    file = FileUtil.getFileFromUri(mContext, intent!!.data, MediaType.VIDEO)
+                    file = getFileFromUri(mContext, intent!!.data, MediaType.VIDEO)
                     if (file == null) return@launch
                     val mMedia: Media =
                         Media.create(Thumb.generate(mContext, MediaType.VIDEO, file!!))
@@ -349,7 +393,7 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
                 PICK_DOCUMENT -> {
                     try {
                         if (intent!!.data == null) return@launch
-                        file = FileUtil.getFileFromUri(
+                        file = getFileFromUri(
                             mContext,
                             intent.data,
                             MediaType.DOCUMENT
@@ -388,6 +432,10 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
         directAction = true
     }
 
+    fun setResolutionConstraint(width: Int, height: Int) {
+        compressResolution = ResolutionConstraint(width, height)
+    }
+
     override fun onShow(dialog: DialogInterface) {
         super.onShow(dialog)
         if (!directAction) return
@@ -398,13 +446,18 @@ open class BottomSheetFilePicker(val applicationId: String) : BaseBottomSheet(),
 
     companion object {
         private val permissions = if (VERSION.SDK_INT >= VERSION_CODES.Q) {
-            arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
+            arrayOf(Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_MEDIA_LOCATION)
         } else {
-            arrayOf(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            arrayOf(Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
 
         private val contact_permission = arrayOf(Manifest.permission.READ_CONTACTS)
-        private val PROJECTION = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+        private val PROJECTION = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER,
+            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
 
         private const val VIDEO_LIMIT = 10
         const val IMAGE = 1

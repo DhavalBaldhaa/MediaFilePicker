@@ -154,20 +154,39 @@ open class BottomSheetFilePicker(private val applicationId: String) : BaseBottom
         }
 
         if (actionButtonTextColor != null) with(binding) {
-            btnTakePhoto.setTextColor(ContextCompat.getColor(requireContext(),
-                actionButtonTextColor!!))
-            btnChooseImage.setTextColor(ContextCompat.getColor(requireContext(),
-                actionButtonTextColor!!))
-            btnTakeVideo.setTextColor(ContextCompat.getColor(requireContext(),
-                actionButtonTextColor!!))
-            btnChooseVideo.setTextColor(ContextCompat.getColor(requireContext(),
-                actionButtonTextColor!!))
+            btnTakePhoto.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    actionButtonTextColor!!
+                )
+            )
+            btnChooseImage.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    actionButtonTextColor!!
+                )
+            )
+            btnTakeVideo.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    actionButtonTextColor!!
+                )
+            )
+            btnChooseVideo.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    actionButtonTextColor!!
+                )
+            )
         }
 
         if (cancelButtonBg != null) binding.btnCancel.setBackgroundResource(cancelButtonBg!!)
-        if (cancelButtonTextColor != null) binding.btnCancel.setTextColor(ContextCompat.getColor(
-            requireContext(),
-            cancelButtonTextColor!!))
+        if (cancelButtonTextColor != null) binding.btnCancel.setTextColor(
+            ContextCompat.getColor(
+                requireContext(),
+                cancelButtonTextColor!!
+            )
+        )
     }
 
     override fun onClick(view: View) {
@@ -194,19 +213,23 @@ open class BottomSheetFilePicker(private val applicationId: String) : BaseBottom
 
     private fun requestPermission(): Boolean {
         if (EasyPermissions.hasPermissions(mContext, *permissions)) return true
-        requestPermissions(this,
+        requestPermissions(
+            this,
             getString(R.string.permission_camera_rationale),
             REQUEST_PERMISSION,
-            permissions)
+            permissions
+        )
         return false
     }
 
     private fun requestContactPermission(): Boolean {
         if (EasyPermissions.hasPermissions(mContext, *contact_permission)) return true
-        requestPermissions(this,
+        requestPermissions(
+            this,
             getString(R.string.permission_contact_rationale),
             REQUEST_CONTACT_PERMISSION,
-            contact_permission)
+            contact_permission
+        )
         return false
     }
 
@@ -216,10 +239,12 @@ open class BottomSheetFilePicker(private val applicationId: String) : BaseBottom
         grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode,
+        EasyPermissions.onRequestPermissionsResult(
+            requestCode,
             permissions,
             grantResults,
-            permissionCallbacks)
+            permissionCallbacks
+        )
     }
 
 //    override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
@@ -268,6 +293,7 @@ open class BottomSheetFilePicker(private val applicationId: String) : BaseBottom
             intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
 
             if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             } else {
                 val resInfoList = mContext.packageManager.queryIntentActivities(
@@ -282,6 +308,8 @@ open class BottomSheetFilePicker(private val applicationId: String) : BaseBottom
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
                     )
                 }
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             }
             startActivityForResult(Intent.createChooser(intent, "Capture Using"), action)
 
@@ -344,12 +372,14 @@ open class BottomSheetFilePicker(private val applicationId: String) : BaseBottom
                     try {
                         if (context == null) return@launch
                         if (file == null) return@launch
-                        file = imageCompress(mContext,
+                        file = imageCompress(
+                            mContext,
                             file!!,
                             MediaType.IMAGE,
                             compressQuality,
                             compressFormat,
-                            compressResolution) // image compress
+                            compressResolution
+                        ) // image compress
                         media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -362,11 +392,13 @@ open class BottomSheetFilePicker(private val applicationId: String) : BaseBottom
                         if (context == null) return@launch
                         file = getFileFromUri(mContext, intent!!.data, MediaType.IMAGE)
                         if (file == null) return@launch
-                        file = imageCompress(mContext,
+                        file = imageCompress(
+                            mContext,
                             file!!,
                             MediaType.IMAGE, compressQuality,
                             compressFormat,
-                            compressResolution) // image compress
+                            compressResolution
+                        ) // image compress
                         media = Media.create(Thumb.generate(mContext, MediaType.IMAGE, file!!))
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -446,18 +478,24 @@ open class BottomSheetFilePicker(private val applicationId: String) : BaseBottom
 
     companion object {
         private val permissions = if (VERSION.SDK_INT >= VERSION_CODES.Q) {
-            arrayOf(Manifest.permission.CAMERA,
+            arrayOf(
+                Manifest.permission.CAMERA,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.ACCESS_MEDIA_LOCATION)
+                Manifest.permission.ACCESS_MEDIA_LOCATION
+            )
         } else {
-            arrayOf(Manifest.permission.CAMERA,
+            arrayOf(
+                Manifest.permission.CAMERA,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
         }
 
         private val contact_permission = arrayOf(Manifest.permission.READ_CONTACTS)
-        private val PROJECTION = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER,
-            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+        private val PROJECTION = arrayOf(
+            ContactsContract.CommonDataKinds.Phone.NUMBER,
+            ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+        )
 
         private const val VIDEO_LIMIT = 10
         const val IMAGE = 1
